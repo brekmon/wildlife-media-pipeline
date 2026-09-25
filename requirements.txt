@@ -1,0 +1,4 @@
+# Runtime. ffmpeg and ffprobe are also required and are NOT pip-installable:
+# install them from your platform's packages and make sure they are on PATH.
+pillow>=10.0
+numpy>=1.24

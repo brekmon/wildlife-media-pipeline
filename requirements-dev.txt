@@ -1,0 +1,2 @@
+# Test-only. Kept separate so installing the tools does not drag in a runner.
+pytest>=8.0

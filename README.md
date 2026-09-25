@@ -1,5 +1,7 @@
 # wildlife-media-pipeline
 
+[![CI](https://github.com/brekmon/wildlife-media-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/brekmon/wildlife-media-pipeline/actions/workflows/ci.yml)
+
 Python tooling that turns a multi-terabyte archive of locked-off wildlife
 footage into finished, measured, standards-compliant deliverables, with the
 dead air removed and the species already identified.
@@ -137,6 +139,47 @@ what was discarded, not at what survived.
 
 Python 3.8+, `numpy`, `Pillow`, and `ffmpeg` / `ffprobe` on `PATH`.
 NVENC and CUDA are optional and used when present.
+
+---
+
+## Tests
+
+```
+pip install -r requirements.txt -r requirements-dev.txt
+pytest
+```
+
+127 tests, run on every push against Python 3.10 through 3.13. No ffmpeg is
+needed: every test targets pure logic, because that is where the silent errors
+live. The subprocess layer is exercised by running the tools on real footage,
+which CI cannot honestly do.
+
+The weight sits on four things:
+
+- **What the cut throws away.** `dropped_ranges` computes the complement of the
+  kept events, and it is the whole safety net. Checking a detector's output only
+  catches errors of commission — a page of hits looks perfect even when the
+  settings are far too aggressive, because it cannot show you the bird that was
+  dropped. Tests cover overlapping detections, unsorted input, events running
+  past the container's stated duration, and the case that matters most: no
+  detections at all must report the entire file as discarded, not an empty list
+  that reads like "all clear".
+- **Rotation.** The pipeline decodes with `-noautorotate`, so the transpose
+  filter is the only thing between a vertically shot clip and a sideways
+  delivery. Each angle is pinned, including that 90 and 270 are not
+  interchangeable and that an unexpected angle returns nothing rather than
+  guessing at the nearest right angle.
+- **Delivery thresholds.** -14 LUFS, -1 dBTP, and the Shorts safe zone measured
+  by alpha bounding box rather than by trusting the coordinates the renderer was
+  given. Resolution independence is asserted, so the verdict cannot depend on
+  the export preset.
+- **What git is allowed to track.** No media, no run output, no `.private-terms`,
+  and no absolute home-directory path left in a default argument, which
+  would name the machine's user.
+
+The suite is also run a second time under a different `PYTHONHASHSEED`. Set
+iteration order is randomised per process, and a tool that answers the same
+question differently on different runs is not verifiable.
 
 ---
 

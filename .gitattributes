@@ -1,0 +1,14 @@
+# Normalise to LF in the repository regardless of who commits from where. A CRLF
+# ending inside a `run:` block makes the Ubuntu runner fail with
+# "$'\r': command not found", which reads as a broken script rather than a
+# line-ending problem.
+* text=auto eol=lf
+*.py   text eol=lf
+*.yml  text eol=lf
+*.md   text eol=lf
+*.txt  text eol=lf
+*.ini  text eol=lf
+*.mp4  binary
+*.mov  binary
+*.wav  binary
+*.png  binary

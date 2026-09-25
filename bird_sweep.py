@@ -201,8 +201,16 @@ def probe(path):
 def all_intra(info):
     """All-Intra (XAVC S-I) means every frame is a keyframe, so stream-copy cuts
     land exactly where we ask. Long GOP snaps back to the nearest keyframe."""
+    # Note this reads the ffprobe PROFILE ("High 4:2:2 Intra"), not the Sony
+    # format name ("XAVC S-I"), which never appears in the stream metadata.
+    #
+    # This used to end with `or "422" in p and "10" in p and "intra" in p`. That
+    # clause could never change the answer: it ends in the same test the first
+    # operand already makes, so it is true only when the result is already true.
+    # Verified identical across every combination of the relevant fragments
+    # before removing it. Behaviour is unchanged; the dead half is gone.
     p = (info.get("profile") or "").lower()
-    return "intra" in p or "422" in p and "10" in p and "intra" in p
+    return "intra" in p
 
 
 # -------------------------------------------------------------- detection ---
